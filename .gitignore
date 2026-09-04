@@ -427,3 +427,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Entorno
+entorno_tfg/
+diffusion/notebooks/data/
