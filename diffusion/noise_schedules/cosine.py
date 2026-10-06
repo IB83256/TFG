@@ -9,7 +9,6 @@ Date:
 from .base_schedule import NoiseSchedule
 from torch import Tensor
 import torch
-import numpy as np
 
 class CosineSchedule(NoiseSchedule):
     """

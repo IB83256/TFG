@@ -31,3 +31,33 @@ def sample_initial_latents(
     """
     channels, height, width = image_shape
     return torch.randn(n_images, channels, height, width, device=device) * std + mean
+
+def noise_like_images(
+    n,
+    image_shape,
+    device,
+):
+    """
+    Generate uniform noise images in [-1, 1].
+
+    Args:
+        n:
+            Number of images.
+
+        image_shape:
+            Shape of each image (C, H, W).
+
+        device:
+            Device where the images are created.
+
+    Returns:
+        Random images in [-1, 1].
+    """
+
+    return (
+        torch.rand(
+            n,
+            *image_shape,
+            device=device,
+        ) * 2 - 1
+    )

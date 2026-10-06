@@ -1,8 +1,8 @@
 import torch
-from ebm.sampling.langevin import langevin_sampling
+from ebm.sampling import langevin_sampling
 from torch.utils.data import DataLoader, TensorDataset
 
-def train_energy_model(
+def train_toy_langevin(
     model,
     data,
     n_epochs=1000,
@@ -34,17 +34,16 @@ def train_energy_model(
             x_init = 8 * torch.rand(
                 real_samples.shape[0],
                 2,
-            ) - 2
+            ) - 4
 
-            trajectory = langevin_sampling(
+            model_samples  = langevin_sampling(
                 model=model,
                 x_init=x_init,
                 n_steps=langevin_steps,
                 step_size=step_size,
-                noise_scale=noise_scale,
-            )
+                noise_scale=noise_scale
+            ).detach()
 
-            model_samples = trajectory[-1].detach()
 
             real_energy = model(real_samples).mean()
             model_energy = model(model_samples).mean()
@@ -68,7 +67,8 @@ def train_energy_model(
     return losses
 
 
-def train_energy_model_dsm(
+
+def train_toy_dsm(
     model,
     data,
     n_epochs=100,
@@ -152,7 +152,8 @@ def train_energy_model_dsm(
     return losses
 
 
-def train_energy_model_pcd(
+
+def train_toy_pcd(
     model,
     data,
     n_epochs=100,
@@ -192,15 +193,14 @@ def train_energy_model_pcd(
 
             # Langevin empieza desde las muestras
             # finales del batch anterior
-            trajectory = langevin_sampling(
+            model_samples  = langevin_sampling(
                 model=model,
                 x_init=persistent_samples,
                 n_steps=langevin_steps,
                 step_size=step_size,
-                noise_scale=noise_scale,
-            )
+                noise_scale=noise_scale
 
-            model_samples = trajectory[-1].detach()
+            ).detach()
 
             # Guardamos las muestras finales
             # para utilizarlas en el siguiente batch
