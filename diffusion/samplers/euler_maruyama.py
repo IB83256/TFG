@@ -9,6 +9,7 @@ Date:
 from typing import Callable, Union
 import torch
 from torch import Tensor
+from diffusion.noise_schedules import compute_effective_noise
 
 def euler_maruyama_integrator(
     x_0: Tensor,

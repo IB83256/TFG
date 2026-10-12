@@ -10,7 +10,6 @@ import torch
 import numpy as np
 from .gaussian_process import GaussianDiffusionProcess
 
-
 class VEProcess(GaussianDiffusionProcess):
     """
     Variance Exploding (VE) diffusion process.

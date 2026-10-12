@@ -10,7 +10,7 @@ import torch
 from torch import Tensor
 import numpy as np
 from .gaussian_process import GaussianDiffusionProcess
-from noise_schedules.base_schedule import NoiseSchedule
+from diffusion.noise_schedules import NoiseSchedule
 
 class VPProcess(GaussianDiffusionProcess):
     """

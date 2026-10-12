@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Score network for multi-scale Denoising Score Matching on MNIST.
+Score and energy networks for multi-scale Denoising Score Matching on MNIST.
+
+Both networks share the same U-Net body. ScoreUNet returns the score
+directly; EnergyUNet returns a scalar energy and obtains the score as
+its negative gradient with respect to the input.
 
 Author: Álvaro Duro
 """
@@ -102,7 +106,15 @@ class ResBlock(nn.Module):
         return h + self.skip(x)
 
 
-class ScoreUNet(nn.Module):
+class UNetBackbone(nn.Module):
+    """
+    Shared U-Net body.
+
+    `h(x, sigma)` rescales the input and returns a tensor with the
+    shape of the image. The module names are the ones used by the
+    original ScoreUNet, so checkpoints remain compatible.
+    """
+
     def __init__(
         self,
         channels=64,
@@ -216,9 +228,10 @@ class ScoreUNet(nn.Module):
             self.out[-1].bias
         )
 
-    def forward(self, x, sigma):
-        # x: (B, 1, 28, 28)
-        # sigma: (B,)
+    def rescale(self, x, sigma):
+        """
+        u = (x - 0.5) / sqrt(sigma^2 + sigma_data^2)
+        """
 
         s = sigma.view(
             -1,
@@ -227,12 +240,21 @@ class ScoreUNet(nn.Module):
             1,
         )
 
-        x_in = (
+        return (
             (x - 0.5)
             / torch.sqrt(
                 s ** 2
                 + self.sigma_data ** 2
             )
+        )
+
+    def h(self, x, sigma):
+        # x: (B, 1, 28, 28)
+        # sigma: (B,)
+
+        x_in = self.rescale(
+            x,
+            sigma,
         )
 
         emb = self.embed(
@@ -273,4 +295,95 @@ class ScoreUNet(nn.Module):
             emb,
         )
 
-        return self.out(d1) / s
+        return self.out(d1)
+
+
+class ScoreUNet(UNetBackbone):
+    """
+    Direct score parameterisation: s_theta(x, sigma) = h_theta(x, sigma) / sigma.
+    """
+
+    def forward(self, x, sigma):
+        s = sigma.view(
+            -1,
+            1,
+            1,
+            1,
+        )
+
+        return self.h(x, sigma) / s
+
+
+class EnergyUNet(UNetBackbone):
+    """
+    Energy parameterisation.
+
+        u = (x - 0.5) / sqrt(sigma^2 + sigma_data^2)
+        E = sqrt(sigma^2 + sigma_data^2) / (2 * sigma) * ||u - h_theta||^2
+
+    `forward(x, sigma)` returns the score -grad_x E, so the trainer and
+    the samplers see the same interface as with ScoreUNet. With the last
+    layer initialised to zero the initial score is -u / sigma, i.e. the
+    Gaussian denoiser.
+    """
+
+    def energy(self, x, sigma):
+        """
+        Scalar energy per image. Returns shape (B,).
+        """
+
+        s = sigma.view(
+            -1,
+            1,
+            1,
+            1,
+        )
+
+        s_total = torch.sqrt(
+            s ** 2
+            + self.sigma_data ** 2
+        )
+
+        residual = (
+            self.rescale(x, sigma)
+            - self.h(x, sigma)
+        )
+
+        weight = (
+            s_total
+            / (2 * s)
+        ).view(-1)
+
+        return (
+            weight
+            * residual
+            .flatten(1)
+            .pow(2)
+            .sum(1)
+        )
+
+    def forward(self, x, sigma):
+        # Capture the outer autograd state BEFORE enabling gradients:
+        # inside the samplers it is disabled, so no second-order graph
+        # is built; during training it is enabled and the score stays
+        # differentiable with respect to the parameters.
+        needs_graph = torch.is_grad_enabled()
+
+        with torch.enable_grad():
+            x_grad = (
+                x.detach()
+                .requires_grad_(True)
+            )
+
+            energy = self.energy(
+                x_grad,
+                sigma,
+            ).sum()
+
+            gradient = torch.autograd.grad(
+                energy,
+                x_grad,
+                create_graph=needs_graph,
+            )[0]
+
+        return -gradient

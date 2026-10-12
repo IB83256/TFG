@@ -31,42 +31,53 @@ class GaussianDiffusionProcess(DiffusionProcess):
         self.sigma_t = sigma_t
     
     def loss_function(
-        self,
-        score_model, 
-        x_0: torch.Tensor, 
-        eps: float = 1.0e-5,
-    ):
-        """The loss function for training score-based generative models.
+            self,
+            score_model, 
+            x_0: torch.Tensor, 
+            eps: float = 1.0e-5,
+            return_details=False,
+        ):
+            """The loss function for training score-based generative models.
 
-        Args:
-            score_model:  A PyTorch model instance that represents a 
-                            time-dependent score-based model.
-        x_0: A mini-batch of training data.    
-        eps: A tolerance value for numerical stability.
-        """
+            Args:
+                score_model:  A PyTorch model instance that represents a 
+                                time-dependent score-based model.
+            x_0: A mini-batch of training data.    
+            eps: A tolerance value for numerical stability.
+            """
+            
+            # Número de muestras en el batch
+            batch_size = x_0.shape[0]
+            
+            # (1) Muestreamos tiempos uniformemente en (0, 1)
+            t = torch.rand(batch_size, device=x_0.device) * (1.0 - eps) + eps
         
-        # Número de muestras en el batch
-        batch_size = x_0.shape[0]
+            # (2) Muestreamos ruido Gaussiano Z ~ N(0, I)
+            z = torch.randn_like(x_0)
         
-        # (1) Muestreamos tiempos uniformemente en (0, 1)
-        t = torch.rand(batch_size, device=x_0.device) * (1.0 - eps) + eps
-    
-        # (2) Muestreamos ruido Gaussiano Z ~ N(0, I)
-        z = torch.randn_like(x_0)
-    
-        # (3) Calculamos sigma(t)
-        sigma = self.sigma_t(t).view(-1,1,1,1)
-    
-        # (4) Generamos x(t) = x_0 + sigma(t) * Z
-        x_t = x_0 + sigma * z
-    
-        # (5) Score predicho por la red
-        score = score_model(x_t, t)
-    
-        # (7) MSE 
-        loss = torch.mean(torch.norm((score*sigma +z ),dim=(1, 2, 3),p = 2)**2)
+            # (3) Calculamos sigma(t)
+            sigma = self.sigma_t(t).view(-1,1,1,1)
+        
+            # (4) Generamos x(t) = x_0 + sigma(t) * Z
+            x_t = x_0 + sigma * z
+        
+            # (5) Score predicho por la red
+            score = score_model(x_t, t)
+        
+            # (6) MSE por muestra
+            per_sample = torch.norm(
+                (score * sigma + z),
+                dim=(1, 2, 3),
+                p=2,
+            )**2
 
-        return loss
+            # (7) MSE 
+            loss = torch.mean(per_sample)
+
+            if return_details:
+                return loss, per_sample.detach(), t.detach()
+
+            return loss
     
     def loss_function_conditional(self, score_model, x_0, y, eps: float = 1.0e-5) -> torch.Tensor:
 

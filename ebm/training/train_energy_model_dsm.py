@@ -2,6 +2,9 @@
 """
 Training utilities for multi-scale Denoising Score Matching.
 
+Works with both ScoreUNet and EnergyUNet: the energy model handles its
+own autograd inside forward(), so the loss below is unchanged.
+
 Author: Álvaro Duro
 """
 
@@ -131,6 +134,15 @@ def _train_one_epoch(
             sigmas=sigmas,
         )
 
+        # Antes de backward() y step(): si la pérdida no es finita, un
+        # paso del optimizador propagaría los NaN a los pesos y, a
+        # través de _ema_update, también a la EMA.
+        if not torch.isfinite(loss):
+            raise RuntimeError(
+                "Pérdida no finita. "
+                "Recarga un checkpoint anterior."
+            )
+
         optimizer.zero_grad(
             set_to_none=True
         )
@@ -149,12 +161,6 @@ def _train_one_epoch(
             model=model,
             decay=config["ema_decay"],
         )
-
-        if not torch.isfinite(loss):
-            raise RuntimeError(
-                "Pérdida no finita. "
-                "Recarga un checkpoint anterior."
-            )
 
         sum_loss.index_add_(
             0,
@@ -323,8 +329,9 @@ def train_energy_model_dsm(
     )
 
     save_results(
-    config=config,
-    hist_it=hist_it,
-    hist_ep=hist_ep,
-)
+        config=config,
+        hist_it=hist_it,
+        hist_ep=hist_ep,
+    )
+
     return hist_it, hist_ep
