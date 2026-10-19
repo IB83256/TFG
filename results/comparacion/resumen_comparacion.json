@@ -1,0 +1,143 @@
+{
+  "config": {
+    "seed": 42,
+    "n_muestras": 10000,
+    "k_vecinos": 3,
+    "usar_inception": false,
+    "regenerar": false,
+    "batch_pcd": 500,
+    "batch_dsm": 250,
+    "batch_difusion": 50,
+    "clf_epocas": 3,
+    "prior_difusion": "sigma"
+  },
+  "precision_clasificador": 0.9841,
+  "n_muestras": 10000,
+  "distribucion": {
+    "MNIST mitad B (referencia)": {
+      "fid": 0.6294597625017679,
+      "kid": -1.1691945592170305,
+      "kid_std": 5.505462808278478,
+      "precision": 0.8974999785423279,
+      "recall": 0.9009000062942505
+    },
+    "PCD": {
+      "fid": 123.13995349401083,
+      "kid": 426.6841234360823,
+      "kid_std": 56.16876793210231,
+      "precision": 0.685699999332428,
+      "recall": 0.8448999524116516
+    },
+    "EBM energía (DSM)": {
+      "fid": 16.41923853381973,
+      "kid": 26.23579298905427,
+      "kid_std": 11.17365127578403,
+      "precision": 0.7170999646186829,
+      "recall": 0.9535999894142151
+    },
+    "Difusión VE-SDE": {
+      "fid": 25.000456372501148,
+      "kid": 44.9377040488981,
+      "kid_std": 11.04404553960305,
+      "precision": 0.7319999933242798,
+      "recall": 0.8628999590873718
+    }
+  },
+  "clasificador": {
+    "MNIST mitad B (referencia)": {
+      "confianza": 0.9832856004446745,
+      "entropia": 0.9990889710822025,
+      "tv": 0.020999999999999984,
+      "mnist_is": 9.468240736730227
+    },
+    "PCD": {
+      "confianza": 0.9062493182137609,
+      "entropia": 0.923176894364513,
+      "tv": 0.247,
+      "mnist_is": 6.560365274221395
+    },
+    "EBM energía (DSM)": {
+      "confianza": 0.9230024864524603,
+      "entropia": 0.9870722536681349,
+      "tv": 0.0932,
+      "mnist_is": 7.880347572129222
+    },
+    "Difusión VE-SDE": {
+      "confianza": 0.9097185117602349,
+      "entropia": 0.9852257371608275,
+      "tv": 0.1201,
+      "mnist_is": 7.5887182583032455
+    }
+  },
+  "diversidad": {
+    "MNIST mitad B (referencia)": {
+      "distancia_media": 40.98651885986328,
+      "ratio_vs_real": 1.002326055214099,
+      "duplicados": 0.007500000298023224
+    },
+    "PCD": {
+      "distancia_media": 39.3939094543457,
+      "ratio_vs_real": 0.9633787635842035,
+      "duplicados": 0.0
+    },
+    "EBM energía (DSM)": {
+      "distancia_media": 39.17993927001953,
+      "ratio_vs_real": 0.9581461188816277,
+      "duplicados": 0.0
+    },
+    "Difusión VE-SDE": {
+      "distancia_media": 37.47765350341797,
+      "ratio_vs_real": 0.9165166898706237,
+      "duplicados": 0.0
+    }
+  },
+  "estabilidad": {
+    "PCD": {
+      "magnitud_tipica": 0.004171837965262438,
+      "dispersion_inicial": 5.698738486148366,
+      "dispersion_final": 1.0248879942727849,
+      "pendiente_normalizada": -0.005449942866645069,
+      "fraccion_picos": 0.01623931623931624
+    },
+    "EBM energía (DSM)": {
+      "magnitud_tipica": 42.17807975915762,
+      "dispersion_inicial": 0.656363566086434,
+      "dispersion_final": 0.08207106906578426,
+      "pendiente_normalizada": -0.001215812383329326,
+      "fraccion_picos": 0.001745014245014245
+    },
+    "Difusión VE-SDE": {
+      "magnitud_tipica": 21.070844509379068,
+      "dispersion_inicial": 3.580119398116901,
+      "dispersion_final": 0.1761212092621922,
+      "pendiente_normalizada": -0.002722782216922341,
+      "fraccion_picos": 0.006702222222222222
+    }
+  },
+  "coste": {
+    "PCD": {
+      "parametros": 76993,
+      "epocas": 60,
+      "s_por_epoca": 53.4484996676445,
+      "total_entrenamiento_min": 53.4484996676445,
+      "nfe": 256,
+      "s_por_1000_muestras": 1.101653265953064
+    },
+    "EBM energía (DSM)": {
+      "parametros": 1980929,
+      "epocas": 60,
+      "s_por_epoca": 28.203951501846312,
+      "total_entrenamiento_min": 28.203951501846312,
+      "nfe": 481,
+      "s_por_1000_muestras": 25.91097469329834
+    },
+    "Difusión VE-SDE": {
+      "parametros": 1115425,
+      "epocas": 30,
+      "s_por_epoca": 17.286832865079244,
+      "total_entrenamiento_min": 8.643416432539622,
+      "nfe": 2000,
+      "s_por_1000_muestras": 111.62639849185943
+    }
+  }
+}

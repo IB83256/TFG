@@ -3,6 +3,7 @@
 Noise schedule utilities for NCSNv2-style multi-scale DSM.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
 
 import math

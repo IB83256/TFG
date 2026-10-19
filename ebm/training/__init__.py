@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+"""
+Implementation of training routines for energy-based models.
+
+Author: Álvaro Duro
+Date: 01-09-2026
+"""
+
 from .train_energy_model_langevin import train_energy_model_langevin
 from .train_energy_model_dsm import train_energy_model_dsm
 from .train_energy_model_pcd import train_energy_model_pcd

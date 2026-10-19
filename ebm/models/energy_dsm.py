@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Score and energy networks for multi-scale Denoising Score Matching on MNIST.
-
-Both networks share the same U-Net body. ScoreUNet returns the score
-directly; EnergyUNet returns a scalar energy and obtains the score as
-its negative gradient with respect to the input.
+Energy model for Denoising Score Matching.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
 
 import math

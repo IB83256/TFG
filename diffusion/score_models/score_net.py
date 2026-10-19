@@ -3,7 +3,7 @@
 ScoreNet architecture for time-dependent score-based generative modeling.
 
 Author: Álvaro Duro 
-Date: 
+Date: 01-09-2026
 """
 
 import torch

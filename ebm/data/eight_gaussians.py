@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+Data generation for the eight gaussians dataset.
+
+Author: Álvaro Duro
+Date: 01-09-2026
+"""
+
+
 import math
 import torch
 

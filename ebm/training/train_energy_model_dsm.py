@@ -6,6 +6,7 @@ Works with both ScoreUNet and EnergyUNet: the energy model handles its
 own autograd inside forward(), so the loss below is unchanged.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
 
 import time
@@ -229,6 +230,10 @@ def train_energy_model_dsm(
         + 1
     )
 
+    # If True, every epoch overwrites a single checkpoint ("last.pt")
+    # instead of writing one file per epoch.
+    only_last = config.get("only_last", True)
+
     n_levels = len(sigmas)
 
     for epoch in range(
@@ -286,6 +291,16 @@ def train_energy_model_dsm(
             eps=eps,
             epoch=epoch,
             config=config,
+            name="last.pt" if only_last else None,
+        )
+
+        # Results are saved every epoch so that an interrupted run
+        # still leaves a usable training history on disk.
+
+        save_results(
+            config=config,
+            hist_it=hist_it,
+            hist_ep=hist_ep,
         )
 
         if (

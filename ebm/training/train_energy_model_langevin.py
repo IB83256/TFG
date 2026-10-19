@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Training utilities for Energy-Based Models using Langevin dynamics.
+
+Author: Álvaro Duro
+Date: 01-09-2026
+"""
+
+
+
 from typing import Callable
 
 import torch

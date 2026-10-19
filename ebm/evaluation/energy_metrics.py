@@ -3,6 +3,7 @@
 Evaluation utilities for Energy-Based Models.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
 
 import torch

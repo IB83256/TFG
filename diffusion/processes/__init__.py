@@ -3,17 +3,15 @@
 Diffusion processes package initialization.
 
 Author: Álvaro Duro y Carlos Beti
-Date: [Fecha]
+Date: 01-09-2026
 """
 
 from .base_process import DiffusionProcess
 from .gaussian_process import GaussianDiffusionProcess
-from .vp_process import VPProcess
 from .ve_process import VEProcess
 
 __all__ = [
     "DiffusionProcess",
     "GaussianDiffusionProcess",
-    "VPProcess",
     "VEProcess"
 ]

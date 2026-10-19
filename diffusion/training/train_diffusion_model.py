@@ -3,15 +3,20 @@
 Training utilities for score-based diffusion models.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
 
 import time
 
 import torch
+import matplotlib.pyplot as plt
 
+from diffusion.samplers import euler_maruyama_integrator
 from utils import (
     save_checkpoint,
     save_results,
+    plot_image_grid,
+    sample_initial_latents,
 )
 
 
@@ -117,6 +122,52 @@ def _train_one_epoch(
         loss_per_t,
     )
 
+
+@torch.no_grad()
+def _sample_for_visualization(
+    model,
+    diffusion_process,
+    x_init,
+    config,
+):
+    """
+    Generate samples for periodic monitoring.
+
+    Uses a reduced number of integration steps: the goal is to see
+    whether the model is learning, not to produce final samples.
+    """
+
+    was_training = model.training
+
+    model.eval()
+
+    _, trajectory = euler_maruyama_integrator(
+        x_init,
+        t_0=config["t_start"],
+        t_end=config["t_end"],
+        n_steps=config.get(
+            "vis_steps",
+            200,
+        ),
+        drift_coefficient=(
+            lambda x_t, t:
+            diffusion_process.reverse_drift(
+                x_t,
+                t,
+                model,
+            )
+        ),
+        diffusion_coefficient=(
+            diffusion_process.diffusion_coefficient
+        ),
+    )
+
+    model.train(was_training)
+
+    # The integrator returns shape (*x_init.shape, n_steps + 1)
+    return trajectory[..., -1]
+
+
 def train_diffusion_model(
     model,
     diffusion_process,
@@ -135,6 +186,38 @@ def train_diffusion_model(
         len(hist_ep["epoch"])
         + 1
     )
+
+    # If True, every epoch overwrites a single checkpoint ("last.pt")
+    # instead of writing one file per epoch.
+    only_last = config.get("only_last", True)
+
+    vis_every = config.get("vis_every", 5)
+
+    n_vis = config.get("vis_samples", 16)
+
+    # Fixed initial latent, so the samples of different epochs are
+    # comparable. The VE prior at t = t_start has standard deviation
+    # sigma_t(t_start), not 1.
+    generator_state = torch.random.get_rng_state()
+
+    torch.manual_seed(1234)
+
+    sigma_start = diffusion_process.sigma_t(
+        torch.tensor(
+            [config["t_start"]],
+            device=device,
+        )
+    ).item()
+
+    vis_init = sample_initial_latents(
+        n_images=n_vis,
+        image_shape=(1, 28, 28),
+        mean=0.0,
+        std=sigma_start,
+        device=device,
+    )
+
+    torch.random.set_rng_state(generator_state)
 
     for epoch in range(
         start_epoch,
@@ -185,6 +268,7 @@ def train_diffusion_model(
             optimizer=optimizer,
             epoch=epoch,
             config=config,
+            name="last.pt" if only_last else None,
         )
 
         save_results(
@@ -192,6 +276,37 @@ def train_diffusion_model(
             hist_it=hist_it,
             hist_ep=hist_ep,
         )
+
+        # Periodic visualization
+
+        if (
+            epoch % vis_every == 0
+            or epoch == config["epochs"]
+        ):
+            samples = _sample_for_visualization(
+                model=model,
+                diffusion_process=diffusion_process,
+                x_init=vis_init,
+                config=config,
+            )
+
+            fig, ax = plot_image_grid(
+                images=samples
+                .detach()
+                .cpu()
+                .clamp(0, 1),
+                figsize=(7, 7),
+                n_cols=8,
+            )
+
+            ax.set_title(
+                f"época {epoch} — "
+                f"{n_vis} muestras "
+                f"({config.get('vis_steps', 200)} pasos, "
+                "mismo ruido inicial)"
+            )
+
+            plt.show()
 
     save_checkpoint(
         model=model,

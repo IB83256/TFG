@@ -3,7 +3,7 @@
 Linear beta schedule for variance preserving diffusion models (OOP version).
 
 Author: Álvaro Duro 
-Date: 
+Date: 01-09-2026
 """
 
 from .base_schedule import NoiseSchedule

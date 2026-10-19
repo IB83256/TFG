@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+Data loading for MNIST dataset.
+
+Author: Álvaro Duro 
+Date: 01-09-2026
+"""
+
+
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 from pathlib import Path

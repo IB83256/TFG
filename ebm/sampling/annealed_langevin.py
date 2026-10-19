@@ -3,6 +3,7 @@
 Annealed Langevin sampling for multi-scale score models.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
 
 import math

@@ -3,7 +3,7 @@
 Gaussian diffusion process.
 
 Author: Álvaro Duro 
-Date: 
+Date: 01-09-2026
 """
 
 import torch

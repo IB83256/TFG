@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
+
 """
-Training utilities for Energy-Based Models using
-Persistent Contrastive Divergence (PCD).
+Training utilities for Energy-Based Models using Persistent Contrastive Divergence.
 
 Author: Álvaro Duro
+Date: 01-09-2026
 """
+
 
 import time
 import numpy as np
 import torch
+import matplotlib.pyplot as plt
 
 from ebm.evaluation import mean_energy
 from utils import save_checkpoint, save_results, plot_image_grid, to_01
@@ -254,6 +257,12 @@ def train_energy_model_pcd(
     # Allows training to continue if the cell is executed again
     start_epoch = len(hist_ep["epoch"]) + 1
 
+    # If True, every epoch overwrites a single checkpoint ("last.pt")
+    # instead of writing one file per epoch. The replay buffer is then
+    # stored as well, so training can be resumed with the persistent
+    # chains intact.
+    only_last = config.get("only_last", True)
+
     for epoch in range(
         start_epoch,
         config["epochs"] + 1,
@@ -346,7 +355,17 @@ def train_energy_model_pcd(
             replay_buffer=replay_buffer,
             epoch=epoch,
             config=config,
+            with_buffer=only_last,
+            name="last.pt" if only_last else None,
+        )
 
+        # Results are saved every epoch so that an interrupted run
+        # still leaves a usable training history on disk.
+
+        save_results(
+            config=config,
+            hist_it=hist_it,
+            hist_ep=hist_ep,
         )
 
         # Periodic visualization
@@ -384,6 +403,8 @@ def train_energy_model_pcd(
                 f"({config['gen_steps']} pasos) | "
                 f"fila 3-4: buffer"
             )
+
+            plt.show()
 
     # Final checkpoint including the persistent replay buffer
 

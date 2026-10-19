@@ -3,7 +3,7 @@
 Exponential integrator for stochastic differential equations (SDEs)
 
 Author: Álvaro Duro 
-Date: 
+Date: 01-09-2026
 """
 
 from typing import Callable, Union

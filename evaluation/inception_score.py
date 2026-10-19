@@ -3,7 +3,7 @@
 Compute Inception Score using torchvision's official InceptionV3 API (modern version).
 
 Author: Álvaro Duro
-Date:
+Date: 01-09-2026
 """
 
 import torch

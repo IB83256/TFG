@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+"""
+Energy model for a simple toy example.
+
+Author: Álvaro Duro
+Date: 01-09-2026
+"""
+
+
 import torch.nn as nn
 
 class EnergyModelToy(nn.Module):

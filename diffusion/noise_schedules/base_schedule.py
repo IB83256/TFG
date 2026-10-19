@@ -5,8 +5,8 @@ Abstract base class for noise schedules used in diffusion processes.
 Defines the interface for computing cumulative alpha products and integrated beta functions 
 across different types of schedules (e.g., linear, cosine).
 
-Author: Álvaro Duro
-Date:
+Author: Álvaro Duro 
+Date: 01-09-2026
 """
 
 from abc import ABC, abstractmethod

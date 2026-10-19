@@ -1,4 +1,11 @@
-from .score_net import ScoreNet
-from .score_net32 import ScoreNet32
+# -*- coding: utf-8 -*-
+"""
+Initialization of the score models package.
 
-__all__ = ["ScoreNet", "ScoreNet32"]
+Author: Álvaro Duro 
+Date: 01-09-2026
+"""
+
+from .score_net import ScoreNet
+
+__all__ = ["ScoreNet"]

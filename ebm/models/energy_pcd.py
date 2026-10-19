@@ -1,3 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Energy model for Persistent Contrastive Divergence.
+
+Author: Álvaro Duro
+Date: 01-09-2026
+"""
+
+
+
 from torch import nn
 import torch
 
